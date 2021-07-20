@@ -12,8 +12,6 @@ class Hand:
         self.busted = False
         self.is_split = False
         self.no_hit = False  # True => Hit not allowed
-        # XXX BUG: no_double is never set true or tested
-        self.no_double = False  # True => Double not allowed
         self.obsolete = False  # Set true when a pair is split into new hands.
         self.surrendered = False
 

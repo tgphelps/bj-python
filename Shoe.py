@@ -21,6 +21,8 @@ class Shoe:
         # print("shoe contains:", len(self.shoe))
         if repeatable:
             random.seed(SEED)
+        else:
+            random.seed()  # Use current date/time as seed.
 
     def enable_tracking(self, yesno: bool) -> None:
         self.track_rounds = yesno

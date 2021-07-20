@@ -4,18 +4,18 @@
 bj.py: Blackjack simulator, for studying the game.
 
 Usage:
-    bj.py [-d <flags>] [-v] [-t] [-n <rounds>] [-s <seats>] [--test] \
+    bj.py [-d <flags>] [-v] [-r] [-l] [-n <rounds>] [-s <seats>] \
 HOUSE-RULES STRATEGY
 
 Options:
     -h  --help           Show this screen, and exit.
     --version            Show version, and exit.
     -v                   Be verbose.
-    -t                   Trace all plays to log file.
+    -l                   Write log file entries.
+    -r                   Generate repeatable deals.
     -d <flags>           Set debug flags.
     -n <rounds>          Number of rounds to play.
     -s <seats>           Number of players to play.
-    --test               Use repeatable card sequence.
 """
 
 from typing import Dict, Any
@@ -37,8 +37,8 @@ STATS_FILE = 'stats.txt'
 
 class Globals:
     verbose: bool
-    trace: bool
-    test: bool
+    log: bool
+    repeatable: bool
     debug: str
     num_rounds: int
     num_players: int
@@ -52,8 +52,8 @@ g = Globals()
 
 # Set from command line flags
 g.verbose = False
-g.trace = False
-g.test = False
+g.log = False
+g.repeatable = False
 g.debug = ''
 g.num_rounds = 1
 g.num_players = 1
@@ -68,10 +68,10 @@ def save_cmd_line(args: Dict[str, Any]) -> None:
 
     if args['-v']:
         g.verbose = True
-    if args['-t']:
-        g.trace = True
-    if args['--test']:
-        g.test = True
+    if args['-l']:
+        g.log = True
+    if args['-r']:
+        g.repeatable = True
     flags = args['-d']
     if flags:
         g.debug = flags
@@ -95,7 +95,7 @@ def main() -> None:
     if g.verbose:
         print("Version:", VERSION)
         print(args)
-    if g.trace:
+    if g.log:
         log.log_open(LOG_FILE)
 
     read_config(args['HOUSE-RULES'])
@@ -105,7 +105,7 @@ def main() -> None:
 
     game = Game.Game(strategy=strategy,
                      players=g.num_players,
-                     repeatable=g.test,
+                     repeatable=g.repeatable,
                      rules=g.rules,
                      verbose=g.verbose)
 
@@ -117,7 +117,7 @@ def main() -> None:
 
     # -----------
 
-    if g.trace:
+    if g.log:
         log.log_close()
 
 

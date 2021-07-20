@@ -8,7 +8,8 @@ from Dealer import Dealer
 from Player import Player
 
 # This should be even, so all wins and losses are integers.
-BET = 2
+BET_UNIT = 2
+BJ_BONUS = 1
 
 default_rules = {
     'num_decks': 6,
@@ -50,7 +51,7 @@ class Game:
         for i in range(self.num_players):
             log(f"new player: {i + 1}")
             p = Player(self.shoe, self.strategy, self.rules, self.verbose,
-                       bet_amount=BET, seat=i+1)
+                       bet_amount=BET_UNIT, seat=i+1)
             self.players.append(p)
 
     def play_round(self) -> None:
@@ -74,7 +75,7 @@ class Game:
             if p.hands[0].blackjack:
                 log("player blackjack")
                 if self.verbose:
-                    print(f"Player BJ")
+                    print("Player BJ")
 
         self.dealer.get_hand()
         if self.dealer.hand.blackjack:
@@ -124,15 +125,12 @@ class Game:
                 if h.blackjack:
                     if not dbj:
                         self.st.blackjacks_won += 1
-                        win = int(1.5 * h.bet_amount)
+                        # win = int(1.5 * h.bet_amount)
+                        win = h.bet_amount + BJ_BONUS
                         log(f"WIN: blackjack: {win}")
                         if self.verbose:
                             print(f'BJ: WIN {win}')
                         self.st.total_won += win
-                        # XXX: Why is this never triggered?
-                        # Answer: Because split hands can't get BJs
-                        if len(p.hands) > 1:
-                            print(f"hands = {len(p.hands)}")
                         continue
                 if dbj:
                     if h.blackjack:
@@ -156,8 +154,8 @@ class Game:
                         log(f"SURRENDER: LOSE {loss}")
                         if self.verbose:
                             print(f'SURRENDER: LOSE {loss}')
-                        self.st.total_lost  += loss
-                        self.st.total_surrenders += 1 # XXX Assumes bet = 2 !
+                        self.st.total_lost += loss
+                        self.st.total_surrenders += 1
                     elif dbust:
                         log(f"WIN - dealer bust: {h.bet_amount}")
                         if self.verbose:
@@ -197,6 +195,7 @@ class Game:
             print("total_push", self.st.total_push, file=f)
             # print("dealer_bjs", self.st.dealer_blackjacks, file=f)
             print("blackjacks_won", self.st.blackjacks_won, file=f)
+            print("hands_surrendered", self.st.total_surrenders, file=f)
             gain = 100 * (self.st.total_won - self.st.total_lost) \
                 / self.st.total_bet
             print(f"%win: {gain:5.4}", file=f)

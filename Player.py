@@ -18,6 +18,7 @@ class Player:
         self.max_split_aces = rules['max_split_aces'] - 1
         self.can_hit_split_aces = rules['can_hit_split_aces']
         self.das_allowed = rules['das_allowed']
+        self.surrender_allowed = rules['surrender']
         self.verbose = verbose
 
         self.splits_done = 0

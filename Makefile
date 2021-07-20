@@ -1,6 +1,6 @@
 
 STRATEGY=data/basic-double-split.txt
-check:
+mypy:
 	mypy *.py
 test:
 	./bj.py --test -n 1 -v -t -s 5 data/house.cfg $(STRATEGY)
