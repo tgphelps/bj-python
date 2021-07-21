@@ -18,7 +18,7 @@ class Player:
         self.max_split_aces = rules['max_split_aces'] - 1
         self.can_hit_split_aces = rules['can_hit_split_aces']
         self.das_allowed = rules['das_allowed']
-        self.surrender_allowed = rules['surrender']
+        self.surrender_allowed = rules['surrender_allowed']
         self.verbose = verbose
 
         self.splits_done = 0
@@ -69,7 +69,7 @@ class Player:
     def maybe_surrender(self, hand: Hand, up_card: int) -> bool:
         "Surrender this hand if strategy says to do so."
         key = (c.SURRENDER, hand.value, up_card)
-        if key in self.strategy:
+        if key in self.strategy and self.surrender_allowed:
             hand.surrender()
             return True
         else:

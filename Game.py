@@ -18,7 +18,7 @@ default_rules = {
     'max_split_hands': 4,
     'max_split_aces': 2,
     'can_hit_split_aces': 0,
-    'surrender': 0
+    'surrender_allowed': 0
     }
 
 
@@ -124,13 +124,14 @@ class Game:
                 self.st.total_bet += h.bet_amount
                 if h.blackjack:
                     if not dbj:
-                        self.st.blackjacks_won += 1
+                        # self.st.blackjacks_won += 1
                         # win = int(1.5 * h.bet_amount)
                         win = h.bet_amount + BJ_BONUS
                         log(f"WIN: blackjack: {win}")
                         if self.verbose:
                             print(f'BJ: WIN {win}')
                         self.st.total_won += win
+                        self.st.total_bj_bonus += BJ_BONUS
                         continue
                 if dbj:
                     if h.blackjack:
@@ -155,7 +156,7 @@ class Game:
                         if self.verbose:
                             print(f'SURRENDER: LOSE {loss}')
                         self.st.total_lost += loss
-                        self.st.total_surrenders += 1
+                        self.st.total_surrendered += loss
                     elif dbust:
                         log(f"WIN - dealer bust: {h.bet_amount}")
                         if self.verbose:
@@ -193,17 +194,18 @@ class Game:
             print("total_won", self.st.total_won, file=f)
             print("total_lost", self.st.total_lost, file=f)
             print("total_push", self.st.total_push, file=f)
+            print("total_bj_bonus", self.st.total_bj_bonus, file=f)
             # print("dealer_bjs", self.st.dealer_blackjacks, file=f)
-            print("blackjacks_won", self.st.blackjacks_won, file=f)
-            print("hands_surrendered", self.st.total_surrenders, file=f)
+            # print("blackjacks_won", self.st.blackjacks_won, file=f)
+            print("total_surrendered", self.st.total_surrendered, file=f)
             gain = 100 * (self.st.total_won - self.st.total_lost) \
                 / self.st.total_bet
             print(f"%win: {gain:5.4}", file=f)
             print("-" * 20, file=f)
             # This assertion assumes a BJ pays 3-2.
             assert self.st.total_won + self.st.total_lost + \
-                self.st.total_push - self.st.blackjacks_won + \
-                self.st.total_surrenders == \
+                self.st.total_push - self.st.total_bj_bonus + \
+                self.st.total_surrendered == \
                 self.st.total_bet
 
 
@@ -213,9 +215,10 @@ class Statistics():
         self.rounds_played = 0
         self.hands_played = 0
         # self.dealer_blackjacks = 0
-        self.blackjacks_won = 0
+        # self.blackjacks_won = 0
         self.total_bet = 0
         self.total_won = 0
         self.total_lost = 0
         self.total_push = 0
-        self.total_surrenders = 0
+        self.total_bj_bonus = 0
+        self.total_surrendered = 0
