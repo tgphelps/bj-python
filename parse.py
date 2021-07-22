@@ -40,8 +40,9 @@ def do_double(s: str, f: List[str]) -> None:
 
 
 def do_surrender(f: List[str]) -> None:
-    counts = f[1].split(',')
-    upcards = f[3].split(',')
+    assert f[1] == 'hard'
+    counts = f[2].split(',')
+    upcards = f[4].split(',')
 
     for ct in counts:
         for u in upcards:

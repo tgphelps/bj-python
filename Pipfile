@@ -9,6 +9,7 @@ verify_ssl = true
 # sqlitedict = "*"
 flake8 = "*"
 mypy = "*"
+pyinstrument = "*"
 
 [packages]
 # docopt = "*"

@@ -68,8 +68,11 @@ class Player:
 
     def maybe_surrender(self, hand: Hand, up_card: int) -> bool:
         "Surrender this hand if strategy says to do so."
+        if hand.is_soft():
+            return False
         key = (c.SURRENDER, hand.value, up_card)
         if key in self.strategy and self.surrender_allowed:
+            log(f"act: {key[0]} {key[1]} {key[2]} surrender")
             hand.surrender()
             return True
         else:

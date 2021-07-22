@@ -1,0 +1,18 @@
+
+
+hit hard 4,5,6,7,8,9,10,11 vs 2,3,4,5,6,7,8,9,10,11
+hit hard 12                vs 2,3,7,8,9,10,11
+hit hard 13,14,15,16       vs 7,8,9,10,11
+
+hit soft 12,13,14,15,16,17 vs 2,3,4,5,6,7,8,9,10,11
+hit soft 18                vs 9,10,11
+
+double hard 9 vs 3,4,5,6
+double hard 10 vs 2,3,4,5,6,7,8,9
+double hard 11 vs 2,3,4,5,6,7,8,9,10,11
+
+double soft 13,14 vs 5,6
+double soft 15,16 vs 4,5,6
+double soft 17    vs 3,4,5,6
+double soft 18    vs 2,3,4,5,6
+double soft 19    vs 6
