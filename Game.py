@@ -64,6 +64,7 @@ class Game:
         if self.shoe.remaining() < self.shuffle_point:
             log("shuffle")
             self.shoe.shuffle()
+        self.shoe.start_round()
 
         # Deal player hands
         for p in self.players:
@@ -109,12 +110,13 @@ class Game:
         log(f"dealer has {dlr}")
         if self.verbose:
             print('\nRESULTS')
-        for p in self.players:
-            for x in enumerate(p.hands):
-                h = x[1]
-                log(f"p{p.seat} hand {x[0]+1}: {h.value}")
+        for pnum, p in enumerate(self.players):
+            if self.verbose:
+                print("player:", pnum + 1)
+            for n, h in enumerate(p.hands):
+                log(f"p{p.seat} hand {n + 1}: {h.value}")
                 if self.verbose:
-                    print(f"hand {x[0]+1}: {h.value}")
+                    print(f"hand {n + 1}: {h.value}")
                 if h.obsolete:
                     if self.verbose:
                         print('obsolete')

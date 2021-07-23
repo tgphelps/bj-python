@@ -111,7 +111,13 @@ def main() -> None:
 
     for i in range(g.num_rounds):
         log.log(f"round: {i + 1}")
+        if g.verbose:
+            print("\nround:", i + 1)
+            print("round start count:", game.shoe.running_count)
         game.play_round()
+        if g.verbose:
+            print("running count", game.shoe.running_count)
+            _ = input("...")
 
     game.write_stats(STATS_FILE, args['STRATEGY'])
 

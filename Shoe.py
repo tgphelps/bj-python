@@ -16,6 +16,8 @@ class Shoe:
         self.shoe = DECK * decks
         self.shoe_size = len(DECK) * decks
         self.next = 0
+        self.running_count = 0
+        self.starting_count = 0  # running_count at start of round
         self.this_round: List[int] = []
         self.track_rounds = False
         # print("shoe contains:", len(self.shoe))
@@ -31,6 +33,7 @@ class Shoe:
         "Shuffle the deck."
         random.shuffle(self.shoe)
         self.next = 0
+        self.running_count = 0
         # print("shuffle...")
 
     def deal(self) -> int:
@@ -38,8 +41,14 @@ class Shoe:
         assert self.next < self.shoe_size
         c = self.shoe[self.next]
         self.next += 1
+        if c <= 6:
+            self.running_count += 1
+        elif c >= 10:
+            self.running_count -= 1
         if self.track_rounds:
             self.this_round.append(c)
+        # XXX debug
+        # print("DEAL:", c, "count:", self.running_count)
         return c
 
     def remaining(self) -> int:
@@ -48,6 +57,7 @@ class Shoe:
 
     def start_round(self) -> None:
         self.this_round = []
+        self.starting_count = self.running_count
 
     def end_round(self) -> List[int]:
         cards = self.this_round
