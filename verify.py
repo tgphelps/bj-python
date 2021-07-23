@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 """
 This reads a log file and verifies that all the 'action' entries are
@@ -28,6 +28,8 @@ def main():
                     verify_ds(int(f[2]), int(f[3]), f[4])
                 elif f[1] == 'sp':
                     verify_sp(int(f[2]), int(f[3]), f[4])
+                elif f[1] == 'su':
+                    verify_su(f[2], int(f[3]), f[4])
                 else:
                     print("ERROR", line)
 
@@ -106,6 +108,20 @@ def verify_sp(val: int, up: int, act: str) -> None:
         pass
     else:
         error('sp', val, up, act)
+
+
+def verify_su(val: str, up: int, act: str) -> None:
+    if (val == 'soft' and act == 'no-surrender') \
+      or (val not in ('15', '16', '17') and act == 'no-surrender') \
+      or (val == '17' and up == 11 and act == 'surrender') \
+      or (val == '17' and up < 11 and act == 'no-surrender') \
+      or (val == '15' and up >=10 and act == 'surrender') \
+      or (val == '15' and up < 10 and act == 'no-surrender') \
+      or (val == '16' and up >= 9 and act == 'surrender') \
+      or (val == '16' and up < 9 and act == 'no-surrender'):
+        pass
+    else:
+        error('su', val, up, act)
 
 
 if __name__ == '__main__':

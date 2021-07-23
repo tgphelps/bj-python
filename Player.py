@@ -53,6 +53,9 @@ class Player:
             if self.verbose:
                 s = "soft" if h.is_soft() else ""
                 print(f"hand: {s} {h} vs {up_card}")
+            # XXX: This skips the surrender/split/double code
+            # XXX I think it's okay, because you can't hit split aces,
+            # XXX and I'm guessing you can't surrender either.
             if h.no_hit:
                 log("cannot hit split ace")
             else:
@@ -68,14 +71,16 @@ class Player:
 
     def maybe_surrender(self, hand: Hand, up_card: int) -> bool:
         "Surrender this hand if strategy says to do so."
-        if hand.is_soft():
-            return False
         key = (c.SURRENDER, hand.value, up_card)
+        if hand.is_soft():
+            log(f"act: {key[0]} soft {key[2]} no-surrender")
+            return False
         if key in self.strategy and self.surrender_allowed:
             log(f"act: {key[0]} {key[1]} {key[2]} surrender")
             hand.surrender()
             return True
         else:
+            log(f"act: {key[0]} {key[1]} {key[2]} no-surrender")
             return False
 
     def maybe_split(self, hand: Hand, up_card: int) -> bool:

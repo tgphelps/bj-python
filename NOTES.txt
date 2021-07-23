@@ -1,0 +1,57 @@
+
+After I finally got the player hand code working (as best I can tell),
+I did some large simulations of various subsets of Basic Strategy, to
+see the effect that the various player options has on the overall
+house edge.
+
+For all of these tests, I used these house rules, which comes directly
+from data/house/cfg:
+
+num_decks = 6
+hit_s17 = 1
+das_allowed = 1
+max_split_hands = 4
+max_split_aces = 2
+can_hit_split_aces = 0
+surrender_allowed = 1
+
+(And blackjacks pay 3-2.)
+
+I think those rules are typical of Las Vegas strip rules.
+
+Here are the 8 different player strategies that I tested with.
+After the first two, the rest of them are subsets of Basic Strategy.
+
+1. Never bust - Never hit a hard hand that can bust, and hit all
+   soft hands of 17 or less.
+2. Emulate dealer - Stand on hard 17 and soft 18, else hit.
+3. Basic hit hard - Handle all hands, hard or soft, according to the
+   basic 'hit hard' strategy. No doubles, split pairs, or surrender.
+4. Basic hit all - Handle all hands according to the basic rules for
+   hitting. No doubles, split pairs, or surrender.
+5. Basic double hard - Like #4, plus basic hard double rules.
+6. Basic double all - Like #4, plus all basic double rules.
+7. Basic splits - Full basic strategy, minus surrender.
+8. Basic full - All basic strategy rules.
+
+Here are the results:
+
+Strategy            Million hands dealt House edge
+==================  =================== ============
+Never bust          40                  6.01%
+Emulate dealer      30                  5.92%
+Basic hit hard      60                  3.52%
+Basic hit all       70                  2.62%
+Basic double hard   60                  1.19%
+Basic double all    80                  1.12%
+Basic splits        120                 0.55%
+Basic full          90                  0.52%
+
+Notes:
+1. My decision on when to stop simulating a strategy was based on when the
+results after a multiple of 10 million hands had "settled down", meaning
+when I doing another 10 million hands didn't change the house edge by 0.01%.
+2. The biggest drop in house edge (1.43%) comes when you allow
+   hard doubles.
+3. Soft doubling improved the house edge by only 0.07%
+4. Surrender improved the house edge by only 0.03%
