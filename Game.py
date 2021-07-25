@@ -1,11 +1,12 @@
 
 import time
-from typing import Set, Tuple, List
+from typing import Set, Tuple, List, Dict
 
 from log import log
 from Shoe import Shoe
 from Dealer import Dealer
 from Player import Player
+import constants as const
 
 # This should be even, so all wins and losses are integers.
 BET_UNIT = 2
@@ -209,6 +210,12 @@ class Game:
                 self.st.total_push - self.st.total_bj_bonus + \
                 self.st.total_surrendered == \
                 self.st.total_bet
+            for n in reversed(range(const.MAX_TRUE_COUNT + 1)):
+                print("true count", -n, self.st.total_count[-n])
+            for n in range(1, const.MAX_TRUE_COUNT + 1):
+                if n > 0:
+                    print("true count", n, self.st.total_count[n])
+
 
 
 class Statistics():
@@ -224,3 +231,8 @@ class Statistics():
         self.total_push = 0
         self.total_bj_bonus = 0
         self.total_surrendered = 0
+        self.total_count: Dict[int, int] = {}
+        for n in range(const.MAX_TRUE_COUNT + 1):
+            self.total_count[n] = 0
+            self.total_count[-n] = 0
+

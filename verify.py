@@ -115,13 +115,13 @@ def verify_su(val: str, up: int, act: str) -> None:
       or (val not in ('15', '16', '17') and act == 'no-surrender') \
       or (val == '17' and up == 11 and act == 'surrender') \
       or (val == '17' and up < 11 and act == 'no-surrender') \
-      or (val == '15' and up >=10 and act == 'surrender') \
+      or (val == '15' and up >= 10 and act == 'surrender') \
       or (val == '15' and up < 10 and act == 'no-surrender') \
       or (val == '16' and up >= 9 and act == 'surrender') \
       or (val == '16' and up < 9 and act == 'no-surrender'):
         pass
     else:
-        error('su', val, up, act)
+        error('su', int(val), up, act)
 
 
 if __name__ == '__main__':

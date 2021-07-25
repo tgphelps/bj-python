@@ -26,6 +26,12 @@ class Shoe:
         else:
             random.seed()  # Use current date/time as seed.
 
+    def true_count(self):
+        tc =int(self.running_count * 52 / self.remaining())
+        # print("running count:", self.running_count)
+        # print("remaining:", self.remaining())
+        return tc
+
     def enable_tracking(self, yesno: bool) -> None:
         self.track_rounds = yesno
 
