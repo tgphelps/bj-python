@@ -112,7 +112,7 @@ def main() -> None:
 
     for i in range(g.num_rounds):
         log.log(f"round: {i + 1}")
-        update_count_stats(game)
+        # update_count_stats(game)
         if g.verbose:
             print("\nround:", i + 1)
             print("round start count:", game.shoe.running_count)
@@ -133,14 +133,14 @@ def main() -> None:
 count = 0  # static
 
 
-def update_count_stats(game: Game.Game):
-    global count
-    count += 1
-    s = game.shoe
-    c = s.true_count()
-    if c > const.MAX_TRUE_COUNT: c = const.MAX_TRUE_COUNT
-    if c < -const.MAX_TRUE_COUNT: c = -const.MAX_TRUE_COUNT
-    game.st.total_count[c] += 1
+# def update_count_stats(game: Game.Game):
+    # global count
+    # count += 1
+    # s = game.shoe
+    # c = s.true_count()
+    # if c > const.MAX_TRUE_COUNT: c = const.MAX_TRUE_COUNT
+    # if c < -const.MAX_TRUE_COUNT: c = -const.MAX_TRUE_COUNT
+    # game.st.total_count[c] += 1
     # if c == 15:
         # print("running count:", game.shoe.running_count)
         # print("remaining:", game.shoe.remaining())

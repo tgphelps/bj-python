@@ -17,7 +17,6 @@ class Shoe:
         self.shoe_size = len(DECK) * decks
         self.next = 0
         self.running_count = 0
-        self.starting_count = 0  # running_count at start of round
         self.this_round: List[int] = []
         self.track_rounds = False
         # print("shoe contains:", len(self.shoe))
@@ -63,7 +62,6 @@ class Shoe:
 
     def start_round(self) -> None:
         self.this_round = []
-        self.starting_count = self.running_count
 
     def end_round(self) -> List[int]:
         cards = self.this_round

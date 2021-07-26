@@ -37,9 +37,13 @@ class Game:
         self.rules = rules
         self.num_decks = rules['num_decks']
         self.shuffle_point = int(self.num_decks * 52 * penetration)
-        self.st = Statistics()
         self.shoe = Shoe(self.num_decks, repeatable=repeatable)
         self.bet_amount = BET_UNIT
+        self.true_count = 0
+
+        self.by_count: Dict[int, Statistics] = {}
+        for n in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT+ 1):
+            self.by_count[n] = Statistics()
 
         log(f"house rules: {rules}")
         self.hit_s17 = rules['hit_s17']
@@ -66,10 +70,16 @@ class Game:
             log("shuffle")
             self.shoe.shuffle()
         self.shoe.start_round()
+        c = self.shoe.true_count()
+        if c < -const.MAX_TRUE_COUNT:
+            c = -const.MAX_TRUE_COUNT
+        elif c > const.MAX_TRUE_COUNT:
+            c = const.MAX_TRUE_COUNT
+        self.true_count = c
 
         # Deal player hands
         for p in self.players:
-            self.st.hands_played += 1
+            self.by_count[self.true_count].hands_played += 1
             p.get_hand()
             log(f"player {p.seat}  hand: {p.hands[0]}")
             if self.verbose:
@@ -100,7 +110,7 @@ class Game:
         for p in self.players:
             # This clears out hands just played.
             p.end_round()
-        self.st.rounds_played += 1
+        self.by_count[self.true_count].rounds_played += 1
 
     def update_stats(self) -> None:
         "Determine the result of each player hand. Compute wins and losses."
@@ -111,6 +121,7 @@ class Game:
         log(f"dealer has {dlr}")
         if self.verbose:
             print('\nRESULTS')
+        tc = self.true_count
         for pnum, p in enumerate(self.players):
             if self.verbose:
                 print("player:", pnum + 1)
@@ -128,7 +139,7 @@ class Game:
                     this_bet = self.bet_amount * 2
                 else:
                     this_bet = self.bet_amount
-                self.st.total_bet += this_bet
+                self.by_count[tc].total_bet += this_bet
                 if h.blackjack:
                     if not dbj:
                         # self.st.blackjacks_won += 1
@@ -137,43 +148,43 @@ class Game:
                         log(f"WIN: blackjack: {win}")
                         if self.verbose:
                             print(f'BJ: WIN {win}')
-                        self.st.total_won += win
-                        self.st.total_bj_bonus += this_bet // 2
+                        self.by_count[tc].total_won += win
+                        self.by_count[tc].total_bj_bonus += this_bet // 2
                         continue
                 if dbj:
                     if h.blackjack:
                         log("PUSH: blackjacks")
                         if self.verbose:
                             print('BJ: PUSH')
-                        self.st.total_push += this_bet
+                        self.by_count[tc].total_push += this_bet
                     else:
                         log(f"LOSS. Dealer BJ: {this_bet}")
                         if self.verbose:
                             print(f'LOSE to dealer BJ. LOSE {this_bet}.')
-                        self.st.total_lost += this_bet
+                        self.by_count[tc].total_lost += this_bet
                 else:  # NO BJs
                     if h.busted:
                         log(f"LOSS - busted: {this_bet}")
                         if self.verbose:
                             print(f'BUST: LOSE {this_bet}')
-                        self.st.total_lost += this_bet
+                        self.by_count[tc].total_lost += this_bet
                     elif h.surrendered:
                         loss = this_bet // 2
                         log(f"SURRENDER: LOSE {loss}")
                         if self.verbose:
                             print(f'SURRENDER: LOSE {loss}')
-                        self.st.total_lost += loss
-                        self.st.total_surrendered += loss
+                        self.by_count[tc].total_lost += loss
+                        self.by_count[tc].total_surrendered += loss
                     elif dbust:
                         log(f"WIN - dealer bust: {this_bet}")
                         if self.verbose:
                             print(f'Dealer bust: WIN {this_bet}')
-                        self.st.total_won += this_bet
+                        self.by_count[tc].total_won += this_bet
                     elif dlr > h.value:
                         log(f"LOSS: {this_bet}")
                         if self.verbose:
                             print(f'LOSE {this_bet}')
-                        self.st.total_lost += this_bet
+                        self.by_count[tc].total_lost += this_bet
                     elif h.value > dlr:
                         # if h.doubled:
                             # self.st.total_bet += self.bet_amount
@@ -183,12 +194,12 @@ class Game:
                         log(f"WIN: {this_bet}")
                         if self.verbose:
                             print(f'WIN {this_bet}')
-                        self.st.total_won += this_bet
+                        self.by_count[tc].total_won += this_bet
                     else:
                         log("PUSH")
                         if self.verbose:
                             print('PUSH result 0')
-                        self.st.total_push += this_bet
+                        self.by_count[tc].total_push += this_bet
         log("                  --------------")
 
         # if self.dealer.hand.blackjack:
@@ -200,30 +211,41 @@ class Game:
         with open(fname, 'at') as f:
             print("time", time.asctime(), file=f)
             print("strategy", strategy_name, file=f)
-            print("rounds_played", self.st.rounds_played, file=f)
-            print("hands_played", self.st.hands_played, file=f)
-            print("total_bet", self.st.total_bet, file=f)
-            print("total_won", self.st.total_won, file=f)
-            print("total_lost", self.st.total_lost, file=f)
-            print("total_push", self.st.total_push, file=f)
-            print("total_bj_bonus", self.st.total_bj_bonus, file=f)
-            # print("dealer_bjs", self.st.dealer_blackjacks, file=f)
-            # print("blackjacks_won", self.st.blackjacks_won, file=f)
-            print("total_surrendered", self.st.total_surrendered, file=f)
-            gain = 100 * (self.st.total_won - self.st.total_lost) \
-                / self.st.total_bet
-            print(f"%win: {gain:5.4}", file=f)
-            print("-" * 20, file=f)
-            # This assertion assumes a BJ pays 3-2.
-            assert self.st.total_won + self.st.total_lost + \
-                self.st.total_push - self.st.total_bj_bonus + \
-                self.st.total_surrendered == \
-                self.st.total_bet
-            for n in reversed(range(const.MAX_TRUE_COUNT + 1)):
-                print("true count", -n, self.st.total_count[-n])
-            for n in range(1, const.MAX_TRUE_COUNT + 1):
-                if n > 0:
-                    print("true count", n, self.st.total_count[n])
+
+            # rounds_played
+            # hands_played
+            # total_bet
+            # total_won
+            # total_lost
+            # total_push
+            # total_bj_bonus
+            # total_surrendered
+            # gain
+
+            # gain = 100 * (self.st.total_won - self.st.total_lost) \
+                # / self.st.total_bet
+            # print(f"%win: {gain:5.4}", file=f)
+            # print("-" * 20, file=f)
+            # assert self.st.total_won + self.st.total_lost + \
+                # self.st.total_push - self.st.total_bj_bonus + \
+                # self.st.total_surrendered == \
+                # self.st.total_bet
+            for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
+                r = self.by_count[tc].rounds_played
+                h = self.by_count[tc].hands_played
+                b = self.by_count[tc].total_bet
+                w = self.by_count[tc].total_won
+                l = self.by_count[tc].total_lost
+                p = self.by_count[tc].total_push
+                bj = self.by_count[tc].total_bj_bonus
+                s = self.by_count[tc].total_surrendered
+                if b > 0:
+                    gain = 100 * (w - l) / b
+                else:
+                    gain = 0.0
+                # print("tc", tc, r, h, b, w, l, p, bj, s, gain, file=f)
+                print(f"tc {tc} {r} {h} {b} {w} {l} {p} {bj} {s} {gain:5.4}", file=f)
+                assert w + l + p - bj + s == b
 
 
 class Statistics():
@@ -239,7 +261,7 @@ class Statistics():
         self.total_push = 0
         self.total_bj_bonus = 0
         self.total_surrendered = 0
-        self.total_count: Dict[int, int] = {}
-        for n in range(const.MAX_TRUE_COUNT + 1):
-            self.total_count[n] = 0
-            self.total_count[-n] = 0
+        # self.total_count: Dict[int, int] = {}
+        # for n in range(const.MAX_TRUE_COUNT + 1):
+            # self.total_count[n] = 0
+            # self.total_count[-n] = 0
