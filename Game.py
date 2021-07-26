@@ -124,67 +124,71 @@ class Game:
                     log("hand is obsolete")
                     # Hand has been split into two. Nothing to do.
                     continue
-                self.st.total_bet += self.bet_amount
+                if h.doubled:
+                    this_bet = self.bet_amount * 2
+                else:
+                    this_bet = self.bet_amount
+                self.st.total_bet += this_bet
                 if h.blackjack:
                     if not dbj:
                         # self.st.blackjacks_won += 1
                         # win = int(1.5 * h.bet_amount)
-                        win = self.bet_amount * 3 // 2
+                        win = this_bet * 3 // 2
                         log(f"WIN: blackjack: {win}")
                         if self.verbose:
                             print(f'BJ: WIN {win}')
                         self.st.total_won += win
-                        self.st.total_bj_bonus += self.bet_amount // 2
+                        self.st.total_bj_bonus += this_bet // 2
                         continue
                 if dbj:
                     if h.blackjack:
                         log("PUSH: blackjacks")
                         if self.verbose:
                             print('BJ: PUSH')
-                        self.st.total_push += self.bet_amount
+                        self.st.total_push += this_bet
                     else:
-                        log(f"LOSS. Dealer BJ: {self.bet_amount}")
+                        log(f"LOSS. Dealer BJ: {this_bet}")
                         if self.verbose:
-                            print(f'LOSE to dealer BJ. LOSE {self.bet_amount}.')
-                        self.st.total_lost += self.bet_amount
+                            print(f'LOSE to dealer BJ. LOSE {this_bet}.')
+                        self.st.total_lost += this_bet
                 else:  # NO BJs
                     if h.busted:
-                        log(f"LOSS - busted: {self.bet_amount}")
+                        log(f"LOSS - busted: {this_bet}")
                         if self.verbose:
-                            print(f'BUST: LOSE {self.bet_amount}')
-                        self.st.total_lost += self.bet_amount
+                            print(f'BUST: LOSE {this_bet}')
+                        self.st.total_lost += this_bet
                     elif h.surrendered:
-                        loss = self.bet_amount // 2
+                        loss = this_bet // 2
                         log(f"SURRENDER: LOSE {loss}")
                         if self.verbose:
                             print(f'SURRENDER: LOSE {loss}')
                         self.st.total_lost += loss
                         self.st.total_surrendered += loss
                     elif dbust:
-                        log(f"WIN - dealer bust: {self.bet_amount}")
+                        log(f"WIN - dealer bust: {this_bet}")
                         if self.verbose:
-                            print(f'Dealer bust: WIN {self.bet_amount}')
-                        self.st.total_won += self.bet_amount
+                            print(f'Dealer bust: WIN {this_bet}')
+                        self.st.total_won += this_bet
                     elif dlr > h.value:
-                        log(f"LOSS: {self.bet_amount}")
+                        log(f"LOSS: {this_bet}")
                         if self.verbose:
-                            print(f'LOSE {self.bet_amount}')
-                        self.st.total_lost += self.bet_amount
+                            print(f'LOSE {this_bet}')
+                        self.st.total_lost += this_bet
                     elif h.value > dlr:
-                        if h.doubled:
-                            self.st.total_bet += self.bet_amount
-                            won = 2 * self.bet_amount
-                        else:
-                            won = self.bet_amount
-                        log(f"WIN: {won}")
+                        # if h.doubled:
+                            # self.st.total_bet += self.bet_amount
+                            # won = 2 * self.bet_amount
+                        # else:
+                            # won = self.bet_amount
+                        log(f"WIN: {this_bet}")
                         if self.verbose:
-                            print(f'WIN {won}')
-                        self.st.total_won += won
+                            print(f'WIN {this_bet}')
+                        self.st.total_won += this_bet
                     else:
                         log("PUSH")
                         if self.verbose:
                             print('PUSH result 0')
-                        self.st.total_push += self.bet_amount
+                        self.st.total_push += this_bet
         log("                  --------------")
 
         # if self.dealer.hand.blackjack:
