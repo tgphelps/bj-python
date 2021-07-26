@@ -4,7 +4,7 @@ from Shoe import Shoe
 
 
 class Hand:
-    def __init__(self, shoe: Shoe, split_card=0, bet_amount=0) -> None:
+    def __init__(self, shoe: Shoe, split_card=0) -> None:
         self.value: int
 
         self.blackjack = False
@@ -16,7 +16,7 @@ class Hand:
         self.surrendered = False
 
         self.shoe = shoe
-        self.bet_amount = bet_amount
+
         if not split_card:
             self.cards = [shoe.deal(), shoe.deal()]
         else:
@@ -62,7 +62,6 @@ class Hand:
 
     def double(self) -> None:
         "Double the bet, and take ONE card."
-        self.bet_amount *= 2
         self.doubled = True
         self.hit()
 

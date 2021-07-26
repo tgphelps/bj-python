@@ -129,7 +129,10 @@ def main() -> None:
     if g.log:
         log.log_close()
 
-count = 0
+
+count = 0  # static
+
+
 def update_count_stats(game: Game.Game):
     global count
     count += 1
@@ -137,13 +140,11 @@ def update_count_stats(game: Game.Game):
     c = s.true_count()
     if c > const.MAX_TRUE_COUNT: c = const.MAX_TRUE_COUNT
     if c < -const.MAX_TRUE_COUNT: c = -const.MAX_TRUE_COUNT
-    # if c == -5:
-        # assert False
     game.st.total_count[c] += 1
-    if c == 15:
-        print("running count:", game.shoe.running_count)
-        print("remaining:", game.shoe.remaining())
-        print(game.shoe.shoe[game.shoe.next:])
+    # if c == 15:
+        # print("running count:", game.shoe.running_count)
+        # print("remaining:", game.shoe.remaining())
+        # print(game.shoe.shoe[game.shoe.next:])
     # print("TRUE COUNT", c, game.st.total_count[c])
 
 

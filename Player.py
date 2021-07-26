@@ -12,7 +12,7 @@ class Player:
                  strategy: Set[Tuple[str, int, int]],
                  rules: Dict[str, int],
                  verbose: bool,
-                 bet_amount=0, seat=0) -> None:
+                 seat=0) -> None:
         self.strategy = strategy
         self.max_splits = rules['max_split_hands'] - 1
         self.max_split_aces = rules['max_split_aces'] - 1
@@ -24,7 +24,6 @@ class Player:
         self.splits_done = 0
         self.shoe = shoe
         self.seat = seat
-        self.bet_amount = bet_amount
         self.hands: List[Hand] = []
 
     def log_hands(self):
@@ -36,10 +35,9 @@ class Player:
     def get_hand(self, split_card=0) -> None:
         "Get a new hand, either with 2 new cards, or 1 new card to a split."
         if split_card == 0:
-            self.hands.append(Hand(self.shoe, bet_amount=self.bet_amount))
+            self.hands.append(Hand(self.shoe))
         else:
-            h = (Hand(self.shoe, split_card=split_card,
-                 bet_amount=self.bet_amount))
+            h = Hand(self.shoe, split_card=split_card)
             if split_card == 11 and not self.can_hit_split_aces:
                 h.no_hit = True
             self.hands.append(h)

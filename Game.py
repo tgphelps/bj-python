@@ -10,7 +10,6 @@ import constants as const
 
 # This should be even, so all wins and losses are integers.
 BET_UNIT = 2
-BJ_BONUS = 1
 
 default_rules = {
     'num_decks': 6,
@@ -40,6 +39,7 @@ class Game:
         self.shuffle_point = int(self.num_decks * 52 * penetration)
         self.st = Statistics()
         self.shoe = Shoe(self.num_decks, repeatable=repeatable)
+        self.bet_amount = BET_UNIT
 
         log(f"house rules: {rules}")
         self.hit_s17 = rules['hit_s17']
@@ -52,7 +52,7 @@ class Game:
         for i in range(self.num_players):
             log(f"new player: {i + 1}")
             p = Player(self.shoe, self.strategy, self.rules, self.verbose,
-                       bet_amount=BET_UNIT, seat=i+1)
+                       seat=i + 1)
             self.players.append(p)
 
     def play_round(self) -> None:
@@ -124,62 +124,67 @@ class Game:
                     log("hand is obsolete")
                     # Hand has been split into two. Nothing to do.
                     continue
-                self.st.total_bet += h.bet_amount
+                self.st.total_bet += self.bet_amount
                 if h.blackjack:
                     if not dbj:
                         # self.st.blackjacks_won += 1
                         # win = int(1.5 * h.bet_amount)
-                        win = h.bet_amount + BJ_BONUS
+                        win = self.bet_amount * 3 // 2
                         log(f"WIN: blackjack: {win}")
                         if self.verbose:
                             print(f'BJ: WIN {win}')
                         self.st.total_won += win
-                        self.st.total_bj_bonus += BJ_BONUS
+                        self.st.total_bj_bonus += self.bet_amount // 2
                         continue
                 if dbj:
                     if h.blackjack:
                         log("PUSH: blackjacks")
                         if self.verbose:
                             print('BJ: PUSH')
-                        self.st.total_push += h.bet_amount
+                        self.st.total_push += self.bet_amount
                     else:
-                        log(f"LOSS. Dealer BJ: {h.bet_amount}")
+                        log(f"LOSS. Dealer BJ: {self.bet_amount}")
                         if self.verbose:
-                            print(f'LOSE to dealer BJ. LOSE {h.bet_amount}.')
-                        self.st.total_lost += h.bet_amount
+                            print(f'LOSE to dealer BJ. LOSE {self.bet_amount}.')
+                        self.st.total_lost += self.bet_amount
                 else:  # NO BJs
                     if h.busted:
-                        log(f"LOSS - busted: {h.bet_amount}")
+                        log(f"LOSS - busted: {self.bet_amount}")
                         if self.verbose:
-                            print(f'BUST: LOSE {h.bet_amount}')
-                        self.st.total_lost += h.bet_amount
+                            print(f'BUST: LOSE {self.bet_amount}')
+                        self.st.total_lost += self.bet_amount
                     elif h.surrendered:
-                        loss = h.bet_amount // 2
+                        loss = self.bet_amount // 2
                         log(f"SURRENDER: LOSE {loss}")
                         if self.verbose:
                             print(f'SURRENDER: LOSE {loss}')
                         self.st.total_lost += loss
                         self.st.total_surrendered += loss
                     elif dbust:
-                        log(f"WIN - dealer bust: {h.bet_amount}")
+                        log(f"WIN - dealer bust: {self.bet_amount}")
                         if self.verbose:
-                            print(f'Dealer bust: WIN {h.bet_amount}')
-                        self.st.total_won += h.bet_amount
+                            print(f'Dealer bust: WIN {self.bet_amount}')
+                        self.st.total_won += self.bet_amount
                     elif dlr > h.value:
-                        log(f"LOSS: {h.bet_amount}")
+                        log(f"LOSS: {self.bet_amount}")
                         if self.verbose:
-                            print(f'LOSE {h.bet_amount}')
-                        self.st.total_lost += h.bet_amount
+                            print(f'LOSE {self.bet_amount}')
+                        self.st.total_lost += self.bet_amount
                     elif h.value > dlr:
-                        log(f"WIN: {h.bet_amount}")
+                        if h.doubled:
+                            self.st.total_bet += self.bet_amount
+                            won = 2 * self.bet_amount
+                        else:
+                            won = self.bet_amount
+                        log(f"WIN: {won}")
                         if self.verbose:
-                            print(f'WIN {h.bet_amount}')
-                        self.st.total_won += h.bet_amount
+                            print(f'WIN {won}')
+                        self.st.total_won += won
                     else:
                         log("PUSH")
                         if self.verbose:
                             print('PUSH result 0')
-                        self.st.total_push += h.bet_amount
+                        self.st.total_push += self.bet_amount
         log("                  --------------")
 
         # if self.dealer.hand.blackjack:
@@ -217,7 +222,6 @@ class Game:
                     print("true count", n, self.st.total_count[n])
 
 
-
 class Statistics():
     "Just a struct to hold the data we want to accumulate."
     def __init__(self) -> None:
@@ -235,4 +239,3 @@ class Statistics():
         for n in range(const.MAX_TRUE_COUNT + 1):
             self.total_count[n] = 0
             self.total_count[-n] = 0
-
