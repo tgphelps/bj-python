@@ -7,37 +7,92 @@ the same as the first one found.
 """
 
 import sys
-from typing import Dict
+from typing import Dict, List
+import constants as const
 
-STATS = 'stats.txt'
+STATS_FILE = 'stats.txt'
+
+class Stats():
+    "Just a struct to hold the data we want to accumulate."
+    def __init__(self) -> None:
+        self.tc = 0
+        self.r = 0
+        self.h = 0
+        self.b = 0
+        self.w = 0
+        self.l = 0
+        self.p = 0
+        self.bj = 0
+        self.s = 0
+        self.g = 0.0
+
+stats:Dict[int, Stats] = {}
 
 
-def print_stats(d: Dict[str, int], strategy: str):
-    print("strategy", strategy)
-    for k in d:
-        print(k, d[k])
-    gain = 100 * (d['total_won'] - d['total_lost']) / d['total_bet']
-    print(f"%win: {gain:5.4}")
+def process_tc_data(f: List[str]):
+    tc = int(f[1])
+    st = stats[tc]
+    st.tc = tc
+    st.r += int(f[2])
+    st.h += int(f[3])
+    st.b += int(f[4])
+    st.w += int(f[5])
+    st.l += int(f[6])
+    st.p += int(f[7])
+    st.bj += int(f[8])
+    st.s += int(f[9])
+    st.g += float(f[10])
+    # print(f)
+
+
+def print_summary():
+    r = 0
+    h = 0
+    b = 0
+    w = 0
+    l = 0
+    p = 0
+    print(" TC  rounds   hands    bet      won      lost     push     gain")
+    print("==== ======== ======== ======== ======== ======== ======== =====")
+    for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
+        st  = stats[tc]
+        r += st.r
+        h += st.h
+        b += st.b
+        w += st.w
+        l += st.l
+        p += st.p
+        if st.b > 0:
+            g = 100 * (st.w - st.l) / st.b
+        else:
+            g = 0.0
+        print(f"{st.tc:4} {st.r:8} {st.h:8} {st.b:8} {st.w:8} {st.l:8} {st.p:8} {g:+5.3}")  
+    g = 100 * (w - l) / b  
+    print(f"     {r:8} {h:8} {b:8} {w:8} {l:8} {p:8} {g:+5.3}")
 
 
 def main() -> None:
+    for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
+        stats[tc] = Stats()
+        
     strategy = ''
-    d: Dict[str, int] = {}
-    with open(STATS, 'rt') as fstats:
+    with open(STATS_FILE, 'rt') as fstats:
         for line in fstats:
+            line = line.rstrip()
             f = line.split()
-            if len(f) != 2:
-                continue
             if f[0] == 'strategy':
                 if strategy == '':
                     strategy = f[1]
+                    print(line)
                 elif strategy != f[1]:
                     print('ERROR: strategy:', f[1], file=sys.stderr)
-            elif not f[0].startswith('%'):
-                if f[0] not in d:
-                    d[f[0]] = 0
-                d[f[0]] += int(f[1])
-    print_stats(d, strategy)
+            elif f[0] == 'time':
+                pass
+            elif f[0] == 'session':
+                pass
+            elif f[0] == 'tc':
+                process_tc_data(f)
+    print_summary()
 
 
 if __name__ == '__main__':

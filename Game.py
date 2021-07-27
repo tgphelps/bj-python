@@ -230,6 +230,9 @@ class Game:
                 # self.st.total_push - self.st.total_bj_bonus + \
                 # self.st.total_surrendered == \
                 # self.st.total_bet
+            total_bet = 0
+            total_won = 0
+            total_lost = 0
             for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
                 r = self.by_count[tc].rounds_played
                 h = self.by_count[tc].hands_played
@@ -246,7 +249,13 @@ class Game:
                 # print("tc", tc, r, h, b, w, l, p, bj, s, gain, file=f)
                 print(f"tc {tc} {r} {h} {b} {w} {l} {p} {bj} {s} {gain:5.4}", file=f)
                 assert w + l + p - bj + s == b
-
+                total_bet += b
+                total_won += w
+                total_lost += l
+            g = 100 * (total_won - total_lost) / total_bet
+            s = f"session gain: {g:5.4}"
+            print(s, file=f)
+            print(s)
 
 class Statistics():
     "Just a struct to hold the data we want to accumulate."
