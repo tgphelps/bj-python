@@ -52,7 +52,7 @@ def print_summary():
     w = 0
     l = 0
     p = 0
-    print(" TC  rounds   hands    bet      won      lost     push     gain")
+    print(" TC  rounds   hands    bet      won      lost     push     edge")
     print("==== ======== ======== ======== ======== ======== ======== =====")
     for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
         st  = stats[tc]
