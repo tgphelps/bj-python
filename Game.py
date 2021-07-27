@@ -42,7 +42,7 @@ class Game:
         self.true_count = 0
 
         self.by_count: Dict[int, Statistics] = {}
-        for n in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT+ 1):
+        for n in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
             self.by_count[n] = Statistics()
 
         log(f"house rules: {rules}")
@@ -214,23 +214,24 @@ class Game:
                 h = self.by_count[tc].hands_played
                 b = self.by_count[tc].total_bet
                 w = self.by_count[tc].total_won
-                l = self.by_count[tc].total_lost
+                ls = self.by_count[tc].total_lost
                 p = self.by_count[tc].total_push
                 bj = self.by_count[tc].total_bj_bonus
                 s = self.by_count[tc].total_surrendered
                 if b > 0:
-                    gain = 100 * (w - l) / b
+                    gain = 100 * (w - ls) / b
                 else:
                     gain = 0.0
-                print(f"tc {tc} {r} {h} {b} {w} {l} {p} {bj} {s} {gain:5.4}", file=f)
-                assert w + l + p - bj + s == b
+                print(f"tc {tc} {r} {h} {b} {w} {ls} {p} {bj} {s} {gain:5.4}", file=f)
+                assert w + ls + p - bj + s == b
                 total_bet += b
                 total_won += w
-                total_lost += l
+                total_lost += ls
             g = 100 * (total_won - total_lost) / total_bet
-            s = f"session gain: {g:5.4}"
-            print(s, file=f)
-            print(s)
+            msg = f"session gain: {g:5.4}"
+            print(msg, file=f)
+            print(msg)
+
 
 class Statistics():
     "Just a struct to hold the data we want to accumulate."

@@ -26,12 +26,12 @@ import config
 import Game
 import log
 import parse
-import constants as const
+# import constants as const
 
 
 # Global parameters
 
-VERSION = '0.10'
+VERSION = '0.20'
 LOG_FILE = 'trace.txt'
 STATS_FILE = 'stats.txt'
 
