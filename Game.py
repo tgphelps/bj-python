@@ -13,6 +13,7 @@ BET_UNIT = 2
 
 default_rules = {
     'num_decks': 6,
+    'cut_card_pct': 25,
     'hit_s17': 1,
     'das_allowed': 1,
     'max_split_hands': 4,
@@ -27,7 +28,7 @@ class Game:
                  players=1,
                  rules=default_rules,
                  strategy={},
-                 penetration=0.25,
+                 # cut_card_pct=0.25,
                  repeatable=False,
                  verbose=False) -> None:
         self.verbose = verbose
@@ -36,7 +37,8 @@ class Game:
         self.strategy: Set[Tuple[str, int, int]] = strategy
         self.rules = rules
         self.num_decks = rules['num_decks']
-        self.shuffle_point = int(self.num_decks * 52 * penetration)
+        self.shuffle_point = int(self.num_decks * 52 * rules['cut_card_pct'] // 100)
+        # print("shuffle point:", self.shuffle_point)
         self.shoe = Shoe(self.num_decks, repeatable=repeatable)
         self.bet_amount = BET_UNIT
         self.true_count = 0

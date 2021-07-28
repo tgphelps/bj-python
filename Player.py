@@ -26,7 +26,7 @@ class Player:
         self.seat = seat
         self.hands: List[Hand] = []
 
-    def log_hands(self):
+    def log_hands(self) -> None:
         "Log all hand contents."
         log("All hands:")
         for h in self.hands:

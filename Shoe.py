@@ -25,10 +25,14 @@ class Shoe:
         else:
             random.seed()  # Use current date/time as seed.
 
-    def true_count(self):
+    def true_count(self) -> int:
+        """Return the true count.
+
+        The count is calculated accurately, but is then truncated toward
+        zero as an int. This about all a person could handle in a real life
+        situation.
+        """
         tc = int(self.running_count * 52 / self.remaining())
-        # print("running count:", self.running_count)
-        # print("remaining:", self.remaining())
         return tc
 
     def enable_tracking(self, yesno: bool) -> None:
@@ -39,7 +43,6 @@ class Shoe:
         random.shuffle(self.shoe)
         self.next = 0
         self.running_count = 0
-        # print("shuffle...")
 
     def deal(self) -> int:
         "Return the next card from the shoe."

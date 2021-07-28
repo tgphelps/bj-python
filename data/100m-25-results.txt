@@ -1,4 +1,5 @@
 strategy data/basic-full.txt
+cut card 25%
  TC  rounds   hands    bet      won      lost     push     edge
 ==== ======== ======== ======== ======== ======== ======== =====
  -15      292     1460     3654     1446     1901      286 -12.5

@@ -18,6 +18,8 @@ def load_config(fname: str) -> Dict[str, int]:
     return d
 
 
+# Just for testing
+
 def main() -> None:
     d = load_config('tmp/config')
     for key in d:

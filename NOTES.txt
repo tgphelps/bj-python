@@ -55,3 +55,59 @@ when I doing another 10 million hands didn't change the house edge by 0.01%.
    hard doubles.
 3. Soft doubling improved the house edge by only 0.07%
 4. Surrender improved the house edge by only 0.03%
+
+--------------------
+
+7/28/2020
+
+I added code to Shoe.py to keep track of the running count, and provide a
+method that returns the true count. Then I changed Game.py to accumulate
+stats of won/lost/push/etc by true count. I decided to force the true count
+to be in the range 15 to 15, thinking that higher counts would (almost)
+never occur.
+
+Then I ran 100 million hands at a 5-player table with 75% deck penetration,
+typical Las Vegas strip rules, with no bet variation and no deviations from
+basic strategy. Here are the results:
+
+ TC  rounds   hands    bet      won      lost     push     edge
+==== ======== ======== ======== ======== ======== ======== =====
+ -15      292     1460     3654     1446     1901      286 -12.5
+ -14      466     2330     5722     2521     2749      402 -3.98
+ -13     1155     5775    14058     5596     7271     1084 -11.9
+ -12     2297    11485    27674    11467    13932     2072 -8.91
+ -11     5027    25135    60132    25101    30092     4510  -8.3
+ -10    10563    52815   125780    54153    61547     9348 -5.88
+  -9    20462   102310   243132   104272   119036    18178 -6.07
+  -8    40502   202510   478212   207199   232315    35744 -5.25
+  -7    73653   368265   864958   376523   417901    64804 -4.78
+  -6   134707   673535  1572134   687596   754923   119694 -4.28
+  -5   242611  1213055  2819030  1247074  1340165   215198  -3.3
+  -4   431131  2155655  4985484  2218694  2353963   383676 -2.71
+  -3   757524  3787620  8715572  3884881  4101536   680160 -2.49
+  -2  1324991  6624955 15174190  6831790  7075603  1189772 -1.61
+  -1  2410543 12052715 27477656 12417258 12749738  2180748 -1.21
+   0  9324356 46621780 105635658 48130176 48606430  8481702 -0.451
+   1  2301166 11505830 25896128 11883970 11817052  2110890 +0.258
+   2  1277204  6386020 14309304  6596281  6496932  1177232 +0.694
+   3   718573  3592865  8014856  3718841  3611036   668372 +1.35
+   4   412993  2064965  4588528  2137612  2056323   387758 +1.77
+   5   232982  1164910  2578812  1207707  1148871   220374 +2.28
+   6   129551   647755  1427740   670762   633978   123136 +2.58
+   7    70573   352865   774032   364882   341471    68552 +3.02
+   8    38721   193605   423636   200482   186052    37762 +3.41
+   9    19297    96485   210228   100294    91456    19102  +4.2
+  10     9866    49330   107390    51265    46653     9910 +4.29
+  11     4839    24195    52366    25000    22660     5056 +4.47
+  12     2147    10735    23092    10914    10065     2176 +3.68
+  13     1101     5505    11746     5793     4904     1106 +7.57
+  14      434     2170     4638     2200     1992      494 +4.48
+  15      273     1365     2902     1359     1245      330 +3.93
+     20000000 100000000 226628444 103183109 104339792 18219628 -0.51
+
+Notice how ALL negative counts translate into a negative expectation for
+the player, and ALL positive counts achieve positive expectation.
+
+Next step will be to keep using basic strategy, but try different amounts
+of bet variation, according to true count.
+

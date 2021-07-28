@@ -31,7 +31,7 @@ class Stats():
 stats: Dict[int, Stats] = {}
 
 
-def process_tc_data(f: List[str]):
+def process_tc_data(f: List[str]) -> None:
     tc = int(f[1])
     st = stats[tc]
     st.tc = tc
@@ -47,7 +47,7 @@ def process_tc_data(f: List[str]):
     # print(f)
 
 
-def print_summary():
+def print_summary() -> None:
     r = 0
     h = 0
     b = 0
