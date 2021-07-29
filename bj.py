@@ -4,7 +4,7 @@
 bj.py: Blackjack simulator, for studying the game.
 
 Usage:
-    bj.py [-d <flags>] [-v] [-r] [-l] [-n <rounds>] [-s <seats>] \
+    bj.py [-d <flags>] [-v] [-r] [-l] [-n <rounds>] [-s <seats>] [ -b bet_spread ] \
 HOUSE-RULES STRATEGY
 
 Options:
@@ -16,6 +16,7 @@ Options:
     -d <flags>           Set debug flags.
     -n <rounds>          Number of rounds to play.
     -s <seats>           Number of players to play.
+    -b <bet_spread>      What max bet spread to use.
 """
 
 from typing import Dict, Any
@@ -31,7 +32,7 @@ import parse
 
 # Global parameters
 
-VERSION = '0.20'
+VERSION = '0.3'
 LOG_FILE = 'trace.txt'
 STATS_FILE = 'stats.txt'
 
@@ -43,6 +44,7 @@ class Globals:
     debug: str
     num_rounds: int
     num_players: int
+    bet_spread: int
 
     rules: Dict[str, int]
 
@@ -58,6 +60,7 @@ g.repeatable = False
 g.debug = ''
 g.num_rounds = 1
 g.num_players = 1
+g.bet_spread = 1
 
 g.rules = {}
 
@@ -82,6 +85,9 @@ def save_cmd_line(args: Dict[str, Any]) -> None:
     n = args['-s']
     if n:
         g.num_players = int(n)
+    b = args['-b']
+    if args['-b']:
+        g.bet_spread = int(b) 
 
 
 def read_config(cfg_file: str) -> None:
@@ -99,6 +105,9 @@ def main() -> None:
     if g.log:
         log.log_open(LOG_FILE)
 
+    log.log(f"bet spread: {g.bet_spread}")
+    if g.verbose:
+        print("bet_spread:", g.bet_spread)
     read_config(args['HOUSE-RULES'])
     strategy = parse.parse_strategy(args['STRATEGY'])
 
@@ -108,6 +117,7 @@ def main() -> None:
                      players=g.num_players,
                      repeatable=g.repeatable,
                      rules=g.rules,
+                     bet_spread=g.bet_spread,
                      verbose=g.verbose)
 
     for i in range(g.num_rounds):

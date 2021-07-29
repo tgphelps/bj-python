@@ -30,6 +30,7 @@ class Game:
                  strategy={},
                  # cut_card_pct=0.25,
                  repeatable=False,
+                 bet_spread=1,
                  verbose=False) -> None:
         self.verbose = verbose
         self.num_players = players
@@ -41,6 +42,7 @@ class Game:
         # print("shuffle point:", self.shuffle_point)
         self.shoe = Shoe(self.num_decks, repeatable=repeatable)
         self.bet_amount = BET_UNIT
+        self.bet_spread = bet_spread
         self.true_count = 0
 
         self.by_count: Dict[int, Statistics] = {}
@@ -61,6 +63,30 @@ class Game:
                        seat=i + 1)
             self.players.append(p)
 
+    def adjust_bet_amount(self) -> None:
+        "Set bet_amount as determined by true count and config."
+        # WARNING: self.set_true_count must have just been called!
+        if self.true_count <= 0:
+            new_bet = BET_UNIT
+            # log(f"BET: {new_bet}  COUNT: {self.true_count}")
+        else:
+            bet_factor = self.true_count
+            if bet_factor > self.bet_spread:
+                bet_factor = self.bet_spread
+            new_bet = bet_factor * BET_UNIT
+            # log(f"BET: {new_bet}  COUNT: {self.true_count}")
+        if new_bet != self.bet_amount:
+            # log(f"CHANGE: {new_bet}  COUNT: {self.true_count}")
+            self.bet_amount = new_bet
+
+    def set_true_count(self) -> None:
+        c = self.shoe.true_count()
+        if c < -const.MAX_TRUE_COUNT:
+            c = -const.MAX_TRUE_COUNT
+        elif c > const.MAX_TRUE_COUNT:
+            c = const.MAX_TRUE_COUNT
+        self.true_count = c
+
     def play_round(self) -> None:
         """
         Deal hands to each player and the dealer.
@@ -72,12 +98,8 @@ class Game:
             log("shuffle")
             self.shoe.shuffle()
         self.shoe.start_round()
-        c = self.shoe.true_count()
-        if c < -const.MAX_TRUE_COUNT:
-            c = -const.MAX_TRUE_COUNT
-        elif c > const.MAX_TRUE_COUNT:
-            c = const.MAX_TRUE_COUNT
-        self.true_count = c
+        self.set_true_count()
+        self.adjust_bet_amount()
 
         # Deal player hands
         for p in self.players:
