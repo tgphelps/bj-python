@@ -31,6 +31,7 @@ class Game:
                  # cut_card_pct=0.25,
                  repeatable=False,
                  bet_spread=1,
+                 ins_count=0,
                  verbose=False) -> None:
         self.verbose = verbose
         self.num_players = players
@@ -43,6 +44,8 @@ class Game:
         self.shoe = Shoe(self.num_decks, repeatable=repeatable)
         self.bet_amount = BET_UNIT
         self.bet_spread = bet_spread
+        self.ins_count = ins_count  # 0 => never take insurance
+        self.just_took_insurance = False
         self.true_count = 0
 
         self.by_count: Dict[int, Statistics] = {}
@@ -66,11 +69,11 @@ class Game:
     def adjust_bet_amount(self) -> None:
         "Set bet_amount as determined by true count and config."
         # WARNING: self.set_true_count must have just been called!
-        if self.true_count <= 0:
+        if self.true_count < 0:
             new_bet = BET_UNIT
             # log(f"BET: {new_bet}  COUNT: {self.true_count}")
         else:
-            bet_factor = self.true_count
+            bet_factor = self.true_count + 1
             if bet_factor > self.bet_spread:
                 bet_factor = self.bet_spread
             new_bet = bet_factor * BET_UNIT
@@ -87,6 +90,17 @@ class Game:
             c = const.MAX_TRUE_COUNT
         self.true_count = c
 
+    def check_for_insurance(self) -> None:
+        if self.dealer.up_card() != 11:
+            self.just_took_insurance = False
+            return
+        if self.ins_count == 0 or self.true_count < self.ins_count:
+            self.just_took_insurance = False
+            log("NO insurance")
+        else:
+            self.just_took_insurance = True
+            log("TAKE insurance")
+
     def play_round(self) -> None:
         """
         Deal hands to each player and the dealer.
@@ -100,6 +114,7 @@ class Game:
         self.shoe.start_round()
         self.set_true_count()
         self.adjust_bet_amount()
+        # self.check_for_insurance()
 
         # Deal player hands
         for p in self.players:
@@ -114,6 +129,7 @@ class Game:
                     print("Player BJ")
 
         self.dealer.get_hand()
+        self.check_for_insurance()
         if self.dealer.hand.blackjack:
             log("dealer blackjack")
             if self.verbose:
@@ -147,6 +163,16 @@ class Game:
             print('\nRESULTS')
 
         tc = self.true_count
+        if self.just_took_insurance:
+            log(f"insurance bet: {self.bet_amount // 2}")
+            self.by_count[tc].insure_bet += self.bet_amount // 2
+            if self.dealer.hole_card() == 10:
+                self.by_count[tc].insure_won += self.bet_amount
+                log(f"insurance won: {self.bet_amount}")
+            else:
+                self.by_count[tc].insure_lost += self.bet_amount // 2
+                log(f"insurance lost: {self.bet_amount // 2}")
+
         for pnum, p in enumerate(self.players):
             if self.verbose:
                 print("player:", pnum + 1)
@@ -233,6 +259,9 @@ class Game:
             total_bet = 0
             total_won = 0
             total_lost = 0
+            tot_ins_bet = 0
+            tot_ins_won = 0
+            tot_ins_lost = 0
             for tc in range(-const.MAX_TRUE_COUNT, const.MAX_TRUE_COUNT + 1):
                 r = self.by_count[tc].rounds_played
                 h = self.by_count[tc].hands_played
@@ -242,19 +271,40 @@ class Game:
                 p = self.by_count[tc].total_push
                 bj = self.by_count[tc].total_bj_bonus
                 s = self.by_count[tc].total_surrendered
+                ib = self.by_count[tc].insure_bet
+                iw = self.by_count[tc].insure_won
+                il = self.by_count[tc].insure_lost
                 if b > 0:
                     gain = 100 * (w - ls) / b
                 else:
                     gain = 0.0
+                if ib > 0:
+                    ig = 100 * (iw - il) / ib
+                else:
+                    ig = 0.0
                 print(f"tc {tc} {r} {h} {b} {w} {ls} {p} {bj} {s} {gain:5.4}", file=f)
+                print(f"ins {tc} {ib} {iw} {il} {ig:5.4}", file=f)
                 assert w + ls + p - bj + s == b
                 total_bet += b
                 total_won += w
                 total_lost += ls
+                tot_ins_bet += ib
+                tot_ins_won += iw
+                tot_ins_lost += il
             g = 100 * (total_won - total_lost) / total_bet
+            if tot_ins_bet == 0:
+                ig = 0.0
+            else:
+                ig = 100 * (tot_ins_won - tot_ins_lost) / tot_ins_bet
             msg = f"session gain: {g:5.4}"
+
             print(msg, file=f)
             print(msg)
+            msg = f"insurance gain: {ig:5.4}"
+            print(msg, file=f)
+            print(msg)
+            # print("insurance bet,won,lost:", tot_ins_bet, tot_ins_won, tot_ins_lost)
+            assert tot_ins_bet == tot_ins_won // 2 + tot_ins_lost
 
 
 class Statistics():
@@ -268,3 +318,7 @@ class Statistics():
         self.total_push = 0
         self.total_bj_bonus = 0
         self.total_surrendered = 0
+        #
+        self.insure_bet = 0
+        self.insure_won = 0
+        self.insure_lost = 0

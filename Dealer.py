@@ -39,3 +39,7 @@ class Dealer:
         # changed from 11 to 1. Return 11 in that case.
         card = self.hand.cards[0]
         return 11 if card == 1 else card
+
+    def hole_card(self) -> int:
+        card = self.hand.cards[1]
+        return 11 if card == 1 else card

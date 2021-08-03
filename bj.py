@@ -5,7 +5,7 @@ bj.py: Blackjack simulator, for studying the game.
 
 Usage:
     bj.py [-d <flags>] [-v] [-r] [-l] [-n <rounds>] [-s <seats>] [ -b bet_spread ] \
-HOUSE-RULES STRATEGY
+    [ --ins <tc> ] HOUSE-RULES STRATEGY
 
 Options:
     -h  --help           Show this screen, and exit.
@@ -17,6 +17,7 @@ Options:
     -n <rounds>          Number of rounds to play.
     -s <seats>           Number of players to play.
     -b <bet_spread>      What max bet spread to use.
+    --ins <tc>           True count at which to take insurance. 0 => never.
 """
 
 from typing import Dict, Any
@@ -45,6 +46,7 @@ class Globals:
     num_rounds: int
     num_players: int
     bet_spread: int
+    ins_count: int
 
     rules: Dict[str, int]
 
@@ -61,6 +63,7 @@ g.debug = ''
 g.num_rounds = 1
 g.num_players = 1
 g.bet_spread = 1
+g.ins_count = 0  # 0 => Never take insurance.
 
 g.rules = {}
 
@@ -87,7 +90,10 @@ def save_cmd_line(args: Dict[str, Any]) -> None:
         g.num_players = int(n)
     b = args['-b']
     if args['-b']:
-        g.bet_spread = int(b) 
+        g.bet_spread = int(b)
+    ins = args['--ins']
+    if ins:
+        g.ins_count = int(ins)
 
 
 def read_config(cfg_file: str) -> None:
@@ -118,6 +124,7 @@ def main() -> None:
                      repeatable=g.repeatable,
                      rules=g.rules,
                      bet_spread=g.bet_spread,
+                     ins_count=g.ins_count,
                      verbose=g.verbose)
 
     for i in range(g.num_rounds):
